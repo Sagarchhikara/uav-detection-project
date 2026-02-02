@@ -1,0 +1,12 @@
+# Dataset paths - UPDATE THIS WITH YOUR ACTUAL PATH
+path: ./data/processed/yolo_format
+train: train/images
+val: val/images
+test: test/images
+
+# Classes
+names:
+  0: drone
+
+# Number of classes
+nc: 1
