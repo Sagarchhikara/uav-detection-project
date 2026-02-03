@@ -1,0 +1,256 @@
+================================================================================
+                    ANTI-UAV DETECTION SYSTEM - SETUP & TRAINING GUIDE
+================================================================================
+
+This guide shows you exactly how to set up the system on a fresh laptop and 
+start training your custom drone detection model.
+
+================================================================================
+PART 1: FRESH SETUP ON NEW LAPTOP
+================================================================================
+
+1. CLONE THE REPOSITORY
+   -----------------------
+   git clone https://github.com/Sagarchhikara/uav-detection-project.git
+   cd uav-detection-project
+   git checkout ML
+
+2. VERIFY PROJECT STRUCTURE
+   ---------------------------
+   Your project should have these folders:
+   
+   Anti-Uav-Radar-System/
+   ├── config/                 # Configuration files
+   ├── data/                   # Dataset location (initially empty)
+   ├── models/                 # Model storage (initially empty)
+   ├── src/                    # Core ML code
+   ├── scripts/                # Training and testing scripts
+   ├── ui/                     # Web interface
+   ├── outputs/                # Results (initially empty)
+   ├── requirements.txt        # Dependencies
+   ├── README.md              # Documentation
+   └── run_app.py             # Launch web interface
+
+3. INSTALL DEPENDENCIES
+   ----------------------
+   # Create virtual environment (recommended)
+   python -m venv venv
+   
+   # Activate environment
+   # Windows:
+   venv\Scripts\activate
+   # Mac/Linux:
+   source venv/bin/activate
+   
+   # Install all dependencies
+   pip install -r requirements.txt
+
+4. VERIFY INSTALLATION
+   ---------------------
+   python -c "import torch; print('PyTorch:', torch.__version__)"
+   python -c "import cv2; print('OpenCV:', cv2.__version__)"
+   python -c "from ultralytics import YOLO; print('YOLOv8: OK')"
+
+================================================================================
+PART 2: DATASET PREPARATION
+================================================================================
+
+5. DATASET UPLOAD LOCATION
+   ------------------------
+   Upload your dataset to this EXACT location:
+   
+   data/raw/Anti-UAV/
+   ├── train/
+   │   ├── video1/
+   │   │   ├── 000001.jpg
+   │   │   ├── 000002.jpg
+   │   │   └── IR_label.json
+   │   ├── video2/
+   │   └── ...
+   ├── val/
+   └── test/
+
+   IMPORTANT: The folder MUST be named "Anti-UAV" exactly as shown above.
+
+6. SUPPORTED DATASET FORMATS
+   ---------------------------
+   - Anti-UAV format (JSON annotations)
+   - YOLO format (.txt files)
+   - Custom format (modify scripts/prepare_dataset.py)
+
+7. PREPARE DATASET FOR TRAINING
+   ------------------------------
+   python scripts/prepare_dataset.py
+   
+   This will:
+   - Convert your dataset to YOLO format
+   - Create data/processed/yolo_format/
+   - Update config/data.yaml with correct paths
+
+================================================================================
+PART 3: MODEL TRAINING
+================================================================================
+
+8. TRAINING CONFIGURATION
+   ------------------------
+   Edit config/model_config.yaml if needed:
+   
+   model:
+     variant: "yolov8s"        # Options: yolov8n, yolov8s, yolov8m, yolov8l
+   
+   training:
+     epochs: 100               # Increase for better accuracy
+     batch_size: 16            # Reduce to 8 if GPU memory issues
+     img_size: 640             # Image resolution
+     device: "auto"            # Will use GPU if available
+
+9. START TRAINING
+   ----------------
+   python scripts/train_model.py
+   
+   Training will:
+   - Download pre-trained YOLOv8 weights automatically
+   - Fine-tune on your drone dataset
+   - Save progress to models/finetuned/drone_detector/
+   - Show real-time metrics in terminal
+
+10. MONITOR TRAINING PROGRESS
+    --------------------------
+    Watch the terminal output:
+    
+    Epoch 1/100: 100%|████████| 500/500 [02:15<00:00,  3.70it/s]
+          Class     Images  Instances      Box(P          R      mAP50  mAP50-95)
+            all        500        732      0.654      0.512      0.598     0.341
+    
+    Training files created:
+    - models/finetuned/drone_detector/weights/best.pt    # Use this model!
+    - models/finetuned/drone_detector/results.png        # Training curves
+    - models/finetuned/drone_detector/confusion_matrix.png
+
+11. TRAINING SUCCESS CRITERIA
+    --------------------------
+    Good training shows:
+    - mAP50 > 0.7 (70% accuracy)
+    - Loss decreasing over epochs
+    - Precision and Recall improving
+
+================================================================================
+PART 4: TESTING YOUR TRAINED MODEL
+================================================================================
+
+12. TEST TRAINED MODEL
+    -------------------
+    python scripts/test_model.py
+    
+    This will:
+    - Load your trained model (best.pt)
+    - Test on sample video
+    - Create output video with detections
+
+13. LAUNCH WEB INTERFACE
+    ---------------------
+    python run_app.py
+    
+    Then open: http://localhost:8501
+    
+    In the web interface:
+    - Select "Trained Model (best.pt)" from dropdown
+    - Upload your test videos
+    - Process and download results
+
+================================================================================
+PART 5: TROUBLESHOOTING
+================================================================================
+
+14. COMMON ISSUES & SOLUTIONS
+    --------------------------
+    
+    ISSUE: "CUDA out of memory"
+    SOLUTION: Reduce batch_size to 8 in config/model_config.yaml
+    
+    ISSUE: "Dataset not found"
+    SOLUTION: Ensure dataset is in data/raw/Anti-UAV/ exactly
+    
+    ISSUE: "No module named 'src'"
+    SOLUTION: Run scripts from project root directory
+    
+    ISSUE: "uploaded_file undefined" in web interface
+    SOLUTION: Refresh the page and try uploading again
+    
+    ISSUE: Training very slow
+    SOLUTION: Use yolov8n instead of yolov8s for faster training
+
+15. PERFORMANCE OPTIMIZATION
+    -------------------------
+    
+    For FASTER training:
+    - Use yolov8n model variant
+    - Reduce batch_size to 8
+    - Reduce epochs to 50
+    - Reduce img_size to 416
+    
+    For BETTER accuracy:
+    - Use yolov8m or yolov8l model variant
+    - Increase epochs to 200
+    - Add more training data
+    - Keep img_size at 640
+
+================================================================================
+PART 6: DEPLOYMENT
+================================================================================
+
+16. USING YOUR TRAINED MODEL
+    -------------------------
+    
+    Web Interface:
+    - Launch: python run_app.py
+    - Select "Trained Model (best.pt)"
+    - Upload videos and process
+    
+    Programmatic Use:
+    from src.detection.detector_with_tracking import DroneDetectorTracker
+    
+    detector = DroneDetectorTracker(
+        model_path='models/finetuned/drone_detector/weights/best.pt'
+    )
+
+17. SYSTEM CAPABILITIES
+    --------------------
+    Your trained system will provide:
+    - Real-time drone detection
+    - Multi-object tracking with unique IDs
+    - Behavior analysis (speed, hovering, restricted zones)
+    - Alert generation (LOW/MEDIUM/HIGH threat levels)
+    - Video processing with annotations
+    - Analytics dashboard
+
+================================================================================
+QUICK START CHECKLIST
+================================================================================
+
+□ 1. Clone repository and checkout ML branch
+□ 2. Install dependencies: pip install -r requirements.txt
+□ 3. Upload dataset to data/raw/Anti-UAV/
+□ 4. Prepare dataset: python scripts/prepare_dataset.py
+□ 5. Start training: python scripts/train_model.py
+□ 6. Wait for training to complete (several hours)
+□ 7. Test model: python scripts/test_model.py
+□ 8. Launch web interface: python run_app.py
+□ 9. Upload test videos and verify results
+
+================================================================================
+SUPPORT
+================================================================================
+
+If you encounter issues:
+1. Check this guide first
+2. Verify all file paths are correct
+3. Ensure you're in the project root directory when running scripts
+4. Check that your dataset format matches the expected structure
+
+Training time: 2-8 hours depending on dataset size and hardware
+GPU recommended but not required (CPU training is much slower)
+
+================================================================================
+END OF GUIDE
+================================================================================

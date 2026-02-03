@@ -39,8 +39,8 @@ venv.bak/
 .ipynb_checkpoints
 
 # Dataset files (too large for git)
-# data/raw/
-# data/processed/
+data/raw/
+data/processed/
 *.mp4
 *.avi
 *.mov

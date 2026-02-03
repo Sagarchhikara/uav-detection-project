@@ -150,8 +150,11 @@ def video_processing_tab(model_path, conf_threshold, restricted_zones):
             process_video(temp_video_path, model_path, conf_threshold, restricted_zones, process_full, save_output, uploaded_file)
         
         # Clean up temp file
-        if Path(temp_video_path).exists():
-            os.unlink(temp_video_path)
+        try:
+            if Path(temp_video_path).exists():
+                os.unlink(temp_video_path)
+        except:
+            pass  # Ignore cleanup errors
 
 def process_video(video_path, model_path, conf_threshold, restricted_zones, process_full, save_output, uploaded_file):
     """Process video with progress tracking"""
