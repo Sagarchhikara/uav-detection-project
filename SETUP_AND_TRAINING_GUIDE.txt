@@ -96,7 +96,7 @@ PART 3: MODEL TRAINING
    Edit config/model_config.yaml if needed:
    
    model:
-     variant: "yolov8s"        # Options: yolov8n, yolov8s, yolov8m, yolov8l
+     variant: "yolov8m"        # Options: yolov8n, yolov8s, yolov8m, yolov8l
    
    training:
      epochs: 100               # Increase for better accuracy
@@ -167,6 +167,7 @@ PART 5: TROUBLESHOOTING
     
     ISSUE: "CUDA out of memory"
     SOLUTION: Reduce batch_size to 8 in config/model_config.yaml
+              Or use yolov8s instead of yolov8m
     
     ISSUE: "Dataset not found"
     SOLUTION: Ensure dataset is in data/raw/Anti-UAV/ exactly
@@ -184,13 +185,13 @@ PART 5: TROUBLESHOOTING
     -------------------------
     
     For FASTER training:
-    - Use yolov8n model variant
+    - Use yolov8s or yolov8n model variant
     - Reduce batch_size to 8
     - Reduce epochs to 50
     - Reduce img_size to 416
     
-    For BETTER accuracy:
-    - Use yolov8m or yolov8l model variant
+    For BETTER accuracy (current setup):
+    - Using yolov8m model variant (current)
     - Increase epochs to 200
     - Add more training data
     - Keep img_size at 640

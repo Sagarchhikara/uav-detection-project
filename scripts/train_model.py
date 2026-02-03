@@ -4,7 +4,7 @@ from pathlib import Path
 import yaml
 
 def train_drone_detector(
-    model_size='yolov8s',
+    model_size='yolov8m',  # Changed to yolov8m for better accuracy
     epochs=100,
     batch_size=16,
     img_size=640,
@@ -113,7 +113,7 @@ if __name__ == "__main__":
     print("This will take several hours depending on your dataset size and hardware.")
     
     results = train_drone_detector(
-        model_size='yolov8s',  # Change to 'yolov8n' if running out of memory
+        model_size='yolov8m',  # Using YOLOv8m for better accuracy
         epochs=100,
         batch_size=16,  # Reduce to 8 if OOM
         img_size=640,

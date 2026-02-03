@@ -147,6 +147,6 @@ if __name__ == "__main__":
         print("  python scripts/train_model.py")
         
         # Test with pre-trained YOLO as fallback
-        print("\nTesting with pre-trained YOLOv8 (will detect general objects, not specifically drones)...")
+        print("\nTesting with pre-trained YOLOv8m (will detect general objects, not specifically drones)...")
         if Path(test_video).exists():
-            test_model_simple('yolov8s.pt', test_video, 'outputs/videos/pretrained_test.mp4')
+            test_model_simple('yolov8m.pt', test_video, 'outputs/videos/pretrained_test.mp4')

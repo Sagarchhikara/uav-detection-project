@@ -1,6 +1,6 @@
 model:
   type: "yolov8"
-  variant: "yolov8s"  # n, s, m, l, x (s is good balance)
+  variant: "yolov8m"  # Changed from yolov8s to yolov8m for better accuracy
   pretrained: true
   
 training:

@@ -61,14 +61,14 @@ def main():
     model_options = []
     if Path("models/finetuned/drone_detector/weights/best.pt").exists():
         model_options.append("Trained Model (best.pt)")
-    model_options.append("Pre-trained YOLOv8s")
+    model_options.append("Pre-trained YOLOv8m")
     
     selected_model = st.sidebar.selectbox("Select Model", model_options)
     
     if selected_model == "Trained Model (best.pt)":
         model_path = "models/finetuned/drone_detector/weights/best.pt"
     else:
-        model_path = "yolov8s.pt"
+        model_path = "yolov8m.pt"
     
     # Detection parameters
     conf_threshold = st.sidebar.slider("Confidence Threshold", 0.1, 1.0, 0.5, 0.1)
@@ -505,6 +505,12 @@ def about_tab():
             st.success("✅ OpenCV available")
         except:
             st.error("❌ OpenCV not installed")
+        
+        # Check model status
+        if Path("models/finetuned/drone_detector/weights/best.pt").exists():
+            st.success("✅ Custom trained model available")
+        else:
+            st.info("ℹ️ Using pre-trained YOLOv8m model")
 
 if __name__ == "__main__":
     main()
