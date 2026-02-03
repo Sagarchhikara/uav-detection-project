@@ -54,9 +54,9 @@ class BehaviorClassifier:
             zone_flag, zone_name = self.zone_checker.check_position(last_x, last_y)
         
         # Determine alert level
-        flags_count = sum([speed_flag, hover_flag, zone_flag])
+        flags_count = int(sum([bool(speed_flag), bool(hover_flag), bool(zone_flag)]))
         
-        if zone_flag:
+        if bool(zone_flag):
             alert_level = 'HIGH'
         elif flags_count >= 2:
             alert_level = 'MEDIUM'
@@ -65,15 +65,15 @@ class BehaviorClassifier:
         else:
             alert_level = 'NORMAL'
         
-        is_suspicious = alert_level != 'NORMAL'
+        is_suspicious = bool(alert_level != 'NORMAL')
         
         return BehaviorAnalysis(
-            track_id=track_id,
-            is_suspicious=is_suspicious,
-            speed_flag=speed_flag,
-            hover_flag=hover_flag,
-            zone_flag=zone_flag,
-            speed_value=speed,
-            alert_level=alert_level,
-            zone_name=zone_name
+            track_id=int(track_id),
+            is_suspicious=bool(is_suspicious),
+            speed_flag=bool(speed_flag),
+            hover_flag=bool(hover_flag),
+            zone_flag=bool(zone_flag),
+            speed_value=float(speed),
+            alert_level=str(alert_level),
+            zone_name=str(zone_name)
         )

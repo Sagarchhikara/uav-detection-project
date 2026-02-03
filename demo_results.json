@@ -1,0 +1,14 @@
+{
+  "summary": {
+    "total_frames": 60,
+    "frames_with_detections": 0,
+    "total_tracks": 0,
+    "total_alerts": 0,
+    "alert_breakdown": {
+      "HIGH": 0,
+      "MEDIUM": 0,
+      "LOW": 0
+    }
+  },
+  "alerts": []
+}

@@ -38,12 +38,12 @@ class SpeedAnalyzer:
                 speed = distance / time_diff  # pixels/second
                 speeds.append(speed)
         
-        return np.mean(speeds) if speeds else 0.0
+        return float(np.mean(speeds)) if speeds else 0.0
     
     def is_high_speed(self, trajectory: List[Tuple]) -> bool:
         """Check if drone is moving at suspicious speed"""
         speed = self.calculate_speed(trajectory)
-        return speed > self.speed_threshold
+        return bool(speed > self.speed_threshold)
     
     def get_instant_speed(self, trajectory: List[Tuple], window=5) -> float:
         """Get instantaneous speed over last N frames"""
@@ -51,4 +51,4 @@ class SpeedAnalyzer:
             return 0.0
         
         recent = trajectory[-min(window, len(trajectory)):]
-        return self.calculate_speed(recent)
+        return float(self.calculate_speed(recent))

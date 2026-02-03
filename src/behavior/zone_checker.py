@@ -24,17 +24,17 @@ class ZoneChecker:
         
         for i, zone in enumerate(self.zones):
             if self._point_in_polygon(point, zone):
-                return True, self.zone_names[i]
+                return bool(True), str(self.zone_names[i])
         
-        return False, ""
+        return bool(False), str("")
     
     def check_trajectory(self, trajectory: List[Tuple[int, float, float]]) -> bool:
         """Check if any point in trajectory enters restricted zone"""
         for _, x, y in trajectory:
             is_restricted, _ = self.check_position(x, y)
             if is_restricted:
-                return True
-        return False
+                return bool(True)
+        return bool(False)
     
     def _point_in_polygon(self, point: Tuple[float, float], polygon: List[Tuple[int, int]]) -> bool:
         """
@@ -56,4 +56,4 @@ class ZoneChecker:
                             inside = not inside
             p1x, p1y = p2x, p2y
         
-        return inside
+        return bool(inside)

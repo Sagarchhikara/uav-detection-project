@@ -37,7 +37,7 @@ class HoverDetector:
         distances = np.sqrt(((positions - centroid)**2).sum(axis=1))
         max_distance = distances.max()
         
-        return max_distance < self.radius_threshold
+        return bool(max_distance < self.radius_threshold)
     
     def calculate_movement_variance(self, trajectory: List[Tuple]) -> float:
         """Calculate variance in position (low = hovering)"""
@@ -45,4 +45,4 @@ class HoverDetector:
             return 0.0
         
         positions = np.array([(x, y) for _, x, y in trajectory])
-        return np.var(positions)
+        return float(np.var(positions))
