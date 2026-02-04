@@ -1,5 +1,5 @@
 # Dataset paths - UPDATE THIS WITH YOUR ACTUAL PATH
-path: ./data/processed/yolo_format
+path: /home/sagar/uav-detection-project/data/processed/yolo_format
 train: train/images
 val: val/images
 test: test/images
