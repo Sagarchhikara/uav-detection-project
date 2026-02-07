@@ -32,10 +32,10 @@ class SpeedAnalyzer:
             frame2, x2, y2 = trajectory[i + 1]
             
             distance = np.sqrt((x2 - x1)**2 + (y2 - y1)**2)
-            time_diff = (frame2 - frame1) / self.fps  # seconds
+            frame_diff = frame2 - frame1
             
-            if time_diff > 0:
-                speed = distance / time_diff  # pixels/second
+            if frame_diff > 0:
+                speed = distance / frame_diff  # pixels/frame
                 speeds.append(speed)
         
         return float(np.mean(speeds)) if speeds else 0.0
