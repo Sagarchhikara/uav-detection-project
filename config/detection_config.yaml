@@ -1,0 +1,30 @@
+detection:
+  confidence_threshold: 0.5
+  iou_threshold: 0.45
+  max_detections: 50
+  
+tracking:
+  tracker_type: "simple"  # or "bytetrack"
+  max_age: 30
+  min_hits: 3
+  iou_threshold: 0.3
+  
+behavior:
+  speed:
+    threshold_pixels_per_frame: 50
+    fps: 30
+  
+  hovering:
+    radius_pixels: 10
+    min_frames: 30
+  
+  restricted_zones:
+    - name: "Building A"
+      polygon: [[100, 100], [200, 100], [200, 200], [100, 200]]
+    - name: "Airspace Red Zone"
+      polygon: [[300, 300], [500, 300], [500, 500], [300, 500]]
+  
+  alert_levels:
+    low: ["speed_flag"]
+    medium: ["speed_flag", "hover_flag"]
+    high: ["restricted_zone_flag"]
