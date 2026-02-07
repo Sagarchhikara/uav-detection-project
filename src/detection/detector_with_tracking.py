@@ -142,7 +142,7 @@ def process_video_with_tracking(model_path, video_path, output_path, restricted_
 if __name__ == "__main__":
     # Example usage
     process_video_with_tracking(
-        model_path='models/finetuned/drone_detector/weights/best.pt',
+        model_path='runs/detect/models/finetuned/drone_detector/weights/best.pt',
         video_path='data/raw/test_video.mp4',
         output_path='outputs/videos/tracked_video.mp4',
         restricted_zones=[

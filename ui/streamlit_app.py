@@ -59,19 +59,32 @@ def main():
     
     # Model selection
     model_options = []
-    if Path("models/finetuned/drone_detector/weights/best.pt").exists():
+    # Check both possible paths
+    possible_paths = [
+        "runs/detect/models/finetuned/drone_detector/weights/best.pt",
+        "models/finetuned/drone_detector/weights/best.pt"
+    ]
+    
+    best_model_path = None
+    for path in possible_paths:
+        if Path(path).exists():
+            best_model_path = path
+            break
+            
+    if best_model_path:
         model_options.append("Trained Model (best.pt)")
+    
     model_options.append("Pre-trained YOLOv8m")
     
     selected_model = st.sidebar.selectbox("Select Model", model_options)
     
     if selected_model == "Trained Model (best.pt)":
-        model_path = "models/finetuned/drone_detector/weights/best.pt"
+        model_path = best_model_path
     else:
         model_path = "yolov8m.pt"
     
     # Detection parameters
-    conf_threshold = st.sidebar.slider("Confidence Threshold", 0.1, 1.0, 0.5, 0.1)
+    conf_threshold = st.sidebar.slider("Confidence Threshold", 0.1, 1.0, 0.25, 0.05)
     
     # Restricted zones
     st.sidebar.subheader("Restricted Zones")
@@ -149,6 +162,26 @@ def video_processing_tab(model_path, conf_threshold, restricted_zones):
         if st.button("🚀 Start Processing", type="primary"):
             process_video(temp_video_path, model_path, conf_threshold, restricted_zones, process_full, save_output, uploaded_file)
         
+        # Display download button if processing is complete
+        if 'processing_complete' in st.session_state and st.session_state.processing_complete:
+            st.success("✅ Processing complete!")
+            
+            # Display final frame if available
+            if 'final_frame' in st.session_state:
+                st.image(st.session_state.final_frame, caption="Final processed frame", channels="RGB", use_column_width=True)
+            
+            # Download button
+            output_path = st.session_state.get('output_path')
+            if output_path and Path(output_path).exists():
+                with open(output_path, 'rb') as f:
+                    download_filename = f"processed_{uploaded_file.name}" if uploaded_file else "processed_video.mp4"
+                    st.download_button(
+                        label="📥 Download Processed Video",
+                        data=f.read(),
+                        file_name=download_filename,
+                        mime="video/mp4"
+                    )
+        
         # Clean up temp file
         try:
             if Path(temp_video_path).exists():
@@ -158,6 +191,14 @@ def video_processing_tab(model_path, conf_threshold, restricted_zones):
 
 def process_video(video_path, model_path, conf_threshold, restricted_zones, process_full, save_output, uploaded_file):
     """Process video with progress tracking"""
+    
+    # Reset state
+    if 'processing_complete' in st.session_state:
+        del st.session_state.processing_complete
+    if 'output_path' in st.session_state:
+        del st.session_state.output_path
+    if 'final_frame' in st.session_state:
+        del st.session_state.final_frame
     
     progress_bar = st.progress(0)
     status_text = st.empty()
@@ -201,6 +242,9 @@ def process_video(video_path, model_path, conf_threshold, restricted_zones, proc
             Path(output_path).parent.mkdir(parents=True, exist_ok=True)
             fourcc = cv2.VideoWriter_fourcc(*'mp4v')
             out = cv2.VideoWriter(output_path, fourcc, fps, (width, height))
+            
+            # Save output path to session state
+            st.session_state.output_path = output_path
         
         # Process frames
         frame_idx = 0
@@ -209,6 +253,8 @@ def process_video(video_path, model_path, conf_threshold, restricted_zones, proc
         
         # Create placeholder for video display
         video_placeholder = st.empty()
+        
+        annotated_frame = None
         
         while True:
             ret, frame = cap.read()
@@ -246,53 +292,11 @@ def process_video(video_path, model_path, conf_threshold, restricted_zones, proc
         if out is not None:
             out.release()
         
-        # Show results
-        status_text.text("✅ Processing complete!")
-        
-        # Display final frame
-        if 'annotated_frame' in locals():
-            display_frame = cv2.cvtColor(annotated_frame, cv2.COLOR_BGR2RGB)
-            st.image(display_frame, caption="Final processed frame", channels="RGB", use_column_width=True)
-        
-        # Show statistics
-        if process_full and all_alerts:
-            st.subheader("Detection Results")
+        # storage final frame for display
+        if annotated_frame is not None:
+            st.session_state.final_frame = cv2.cvtColor(annotated_frame, cv2.COLOR_BGR2RGB)
             
-            stats = detector.alert_manager.get_statistics()
-            
-            col1, col2, col3, col4 = st.columns(4)
-            with col1:
-                st.metric("Total Alerts", stats.get('total_alerts', 0))
-            with col2:
-                st.metric("High Priority", stats.get('high_alerts', 0))
-            with col3:
-                st.metric("Medium Priority", stats.get('medium_alerts', 0))
-            with col4:
-                st.metric("Low Priority", stats.get('low_alerts', 0))
-            
-            # Alert timeline
-            if all_alerts and PLOTLY_AVAILABLE:
-                alert_df = pd.DataFrame(all_alerts)
-                fig = px.scatter(alert_df, x='frame_num', y='track_id', 
-                               color='alert_level', size='speed_value',
-                               title="Alert Timeline")
-                st.plotly_chart(fig, use_container_width=True)
-            elif all_alerts:
-                st.subheader("Alert Summary")
-                st.write(f"Generated {len(all_alerts)} alerts during processing")
-                for i, alert in enumerate(all_alerts[:5]):  # Show first 5
-                    st.write(f"Alert {i+1}: Track {alert['track_id']} - {alert['alert_level']} at frame {alert['frame_num']}")
-        
-        # Download link for output video
-        if save_output and output_path and Path(output_path).exists():
-            with open(output_path, 'rb') as f:
-                download_filename = f"processed_{uploaded_file.name}" if uploaded_file else "processed_video.mp4"
-                st.download_button(
-                    label="📥 Download Processed Video",
-                    data=f.read(),
-                    file_name=download_filename,
-                    mime="video/mp4"
-                )
+        st.session_state.processing_complete = True
     
     except Exception as e:
         st.error(f"Error processing video: {str(e)}")
